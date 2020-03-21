@@ -16,5 +16,5 @@
 /**
   * RDF4J client examples for Amazon Neptune.
   */
-package com.amazonaws.neptune.client.rdf4j.examples;
+package com.amazonaws.neptune.client.rdf4j;
 
