@@ -81,10 +81,9 @@ public final class NeptuneRdf4JSigV4Example {
         final String endpoint = args[0];
 
         // example of sending a signed query against the SPARQL endpoint
-        executeSignedQueryRequest(endpoint);
-
-        // try a SPARQL UPDATE request
-        executeSignedInsertRequest(endpoint);
+        // use default SAMPLE_QUERY if not specified from input args
+        final String query = (args.length > 1 && !StringUtils.isNullOrEmpty(args[1])) ? args[1] : SAMPLE_QUERY;
+        executeSignedQueryRequest(endpoint, query);
     }
 
     /**
@@ -93,7 +92,7 @@ public final class NeptuneRdf4JSigV4Example {
      * @param endpointUrl of the endpoint to which to send the request
      * @throws NeptuneSigV4SignerException in case there's a problem signing the request
      */
-    protected static void executeSignedQueryRequest(final String endpointUrl)
+    protected static void executeSignedQueryRequest(final String endpointUrl, final String query)
             throws NeptuneSigV4SignerException {
 
         final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
@@ -103,7 +102,7 @@ public final class NeptuneRdf4JSigV4Example {
         try {
 
             neptuneSparqlRepo.initialize();
-            evaluateAndPrintQueryResult(SAMPLE_QUERY, neptuneSparqlRepo);
+            evaluateAndPrintQueryResult(query, neptuneSparqlRepo);
 
         } finally {
 
