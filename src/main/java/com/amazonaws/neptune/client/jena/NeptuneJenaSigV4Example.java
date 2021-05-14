@@ -27,9 +27,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
@@ -83,12 +80,13 @@ public class NeptuneJenaSigV4Example {
                 .queryEndpoint("sparql")
                 .updateEndpoint("sparql");
 
-        Query query = QueryFactory.create("SELECT * { ?s ?p ?o } LIMIT 100");
+        String query = "SELECT * { ?s ?p ?o } LIMIT 100";
 
         // Whether the connection can be reused depends on the details of the implementation.
         // See example 5.
         try (RDFConnection conn = builder.build()) {
-            conn.queryResultSet(query, ResultSetFormatter::out);
+            System.out.println("> Printing query result: ");
+            conn.querySelect(query, System.out::println);
         }
     }
 }
