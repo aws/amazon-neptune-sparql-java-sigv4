@@ -19,7 +19,7 @@
     <groupId>com.amazonaws</groupId>
     <artifactId>amazon-neptune-sparql-java-sigv4</artifactId>
     <packaging>jar</packaging>
-    <version>2.1.1</version>
+    <version>2.3.1</version>
 
     <name>amazon-neptune-sparql-java-sigv4</name>
     <description>
@@ -75,17 +75,17 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>2.9.10</version>
+                <version>2.12.3</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.10.0.pr1</version>
+                <version>2.12.3</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-cbor</artifactId>
-                <version>2.9.10</version>
+                <version>2.12.3</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -94,34 +94,35 @@
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-repository-sparql</artifactId>
-            <version>2.3.3</version>
+            <version>3.6.3</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
-            <version>3.7.0</version>
+            <!-- version 4.0.0 is compiled with Java 11 (55), incompatible with 8 (52) -->
+            <version>3.17.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-base</artifactId>
-            <version>3.7.0</version>
+            <version>3.17.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-core</artifactId>
-            <version>3.7.0</version>
+            <version>3.17.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-rdfconnection</artifactId>
-            <version>3.7.0</version>
+            <version>3.17.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.9</version>
+            <version>4.5.13</version>
         </dependency>
 
         <!-- Neptune Sigv4 Signer -->
@@ -135,7 +136,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -150,7 +151,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.0.1</version>
+                        <version>3.2.1</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -165,7 +166,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.0.0</version>
+                        <version>3.2.0</version>
                         <configuration>
                             <name>Amazon Neptune Sparql Java Sigv4</name>
                             <encoding>UTF-8</encoding>
@@ -188,7 +189,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
