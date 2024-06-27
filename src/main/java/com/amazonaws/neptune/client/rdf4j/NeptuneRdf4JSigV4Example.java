@@ -15,10 +15,11 @@
 
 package com.amazonaws.neptune.client.rdf4j;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import com.amazonaws.neptune.auth.NeptuneSigV4SignerException;
-import com.amazonaws.util.StringUtils;
+import software.amazon.awssdk.utils.StringUtils;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
@@ -73,7 +74,7 @@ public final class NeptuneRdf4JSigV4Example {
      */
     public static void main(final String[] args) throws Exception {
 
-        if (args.length == 0 || StringUtils.isNullOrEmpty(args[0])) {
+        if (args.length == 0 || StringUtils.isEmpty(args[0])) {
             System.err.println("Please specify your endpoint as program argument "
                     + "(e.g.: http://<my_neptune_host>:<my_neptune_port>)");
             System.exit(1);
@@ -82,7 +83,7 @@ public final class NeptuneRdf4JSigV4Example {
 
         // example of sending a signed query against the SPARQL endpoint
         // use default SAMPLE_QUERY if not specified from input args
-        final String query = (args.length > 1 && !StringUtils.isNullOrEmpty(args[1])) ? args[1] : SAMPLE_QUERY;
+        final String query = (args.length > 1 && !StringUtils.isEmpty(args[1])) ? args[1] : SAMPLE_QUERY;
         executeSignedQueryRequest(endpoint, query);
     }
 
@@ -95,7 +96,7 @@ public final class NeptuneRdf4JSigV4Example {
     protected static void executeSignedQueryRequest(final String endpointUrl, final String query)
             throws NeptuneSigV4SignerException {
 
-        final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
+        final AwsCredentialsProvider awsCredentialsProvider = DefaultCredentialsProvider.create();
         final NeptuneSparqlRepository neptuneSparqlRepo =
                 new NeptuneSparqlRepository(endpointUrl, awsCredentialsProvider, TEST_REGION);
 
@@ -120,7 +121,7 @@ public final class NeptuneRdf4JSigV4Example {
     protected static void executeSignedInsertRequest(final String endpointUrl)
             throws NeptuneSigV4SignerException {
 
-        final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
+        final AwsCredentialsProvider awsCredentialsProvider = DefaultCredentialsProvider.create();
 
         final NeptuneSparqlRepository neptuneSparqlRepo =
                 new NeptuneSparqlRepository(endpointUrl, awsCredentialsProvider, TEST_REGION);
