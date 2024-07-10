@@ -15,7 +15,7 @@
 
 package com.amazonaws.neptune.client.rdf4j;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import com.amazonaws.neptune.auth.NeptuneApacheHttpSigV4Signer;
 import com.amazonaws.neptune.auth.NeptuneSigV4Signer;
 import com.amazonaws.neptune.auth.NeptuneSigV4SignerException;
@@ -60,7 +60,7 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
     /**
      * The credentials provider, offering credentials for signing the request.
      */
-    private final AWSCredentialsProvider awsCredentialsProvider;
+    private final AwsCredentialsProvider awsCredentialsProvider;
 
     /**
      * The signature V4 signer used to sign the request.
@@ -92,7 +92,7 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
      * @throws NeptuneSigV4SignerException in case something goes wrong with signer initialization
      */
     public NeptuneSparqlRepository(
-            final String endpointUrl, final AWSCredentialsProvider awsCredentialsProvider,
+            final String endpointUrl, final AwsCredentialsProvider awsCredentialsProvider,
             final String regionName)
             throws NeptuneSigV4SignerException {
 

@@ -15,11 +15,9 @@
 
 package com.amazonaws.neptune.client.jena;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.neptune.auth.NeptuneApacheHttpSigV4Signer;
 import com.amazonaws.neptune.auth.NeptuneSigV4SignerException;
-import com.amazonaws.util.StringUtils;
+import software.amazon.awssdk.utils.StringUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -30,6 +28,8 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 
 /*
  * Example of a building a remote connection
@@ -38,7 +38,7 @@ public class NeptuneJenaSigV4Example {
 
     public static void main(String... args) throws NeptuneSigV4SignerException {
 
-        if (args.length == 0 || StringUtils.isNullOrEmpty(args[0])) {
+        if (args.length == 0 || StringUtils.isEmpty(args[0])) {
             System.err.println("Please specify your endpoint as program argument "
                     + "(e.g.: http://<your_neptune_endpoint>:<your_neptune_endpoint>)");
             System.exit(1);
@@ -47,7 +47,7 @@ public class NeptuneJenaSigV4Example {
         final String endpoint = args[0];
 
         final String regionName = "us-east-1";
-        final AWSCredentialsProvider awsCredentialsProvider = new DefaultAWSCredentialsProviderChain();
+        final AwsCredentialsProvider awsCredentialsProvider = DefaultCredentialsProvider.create();
 
         final NeptuneApacheHttpSigV4Signer v4Signer = new NeptuneApacheHttpSigV4Signer(regionName, awsCredentialsProvider);
 
