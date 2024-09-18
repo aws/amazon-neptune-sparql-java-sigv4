@@ -19,7 +19,7 @@
     <groupId>com.amazonaws</groupId>
     <artifactId>amazon-neptune-sparql-java-sigv4</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>3.0.1</version>
 
     <name>amazon-neptune-sparql-java-sigv4</name>
     <description>
