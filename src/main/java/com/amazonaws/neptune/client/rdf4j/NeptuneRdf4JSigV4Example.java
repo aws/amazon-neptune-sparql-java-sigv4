@@ -102,7 +102,7 @@ public final class NeptuneRdf4JSigV4Example {
 
         try {
 
-            neptuneSparqlRepo.initialize();
+            neptuneSparqlRepo.init();
             evaluateAndPrintQueryResult(query, neptuneSparqlRepo);
 
         } finally {
@@ -127,7 +127,7 @@ public final class NeptuneRdf4JSigV4Example {
                 new NeptuneSparqlRepository(endpointUrl, awsCredentialsProvider, TEST_REGION);
 
         try {
-            neptuneSparqlRepo.initialize();
+            neptuneSparqlRepo.init();
 
             try (RepositoryConnection conn = neptuneSparqlRepo.getConnection()) {
 
@@ -156,7 +156,7 @@ public final class NeptuneRdf4JSigV4Example {
 
         try {
 
-            neptuneSparqlRepo.initialize();
+            neptuneSparqlRepo.init();
             evaluateAndPrintQueryResult(SAMPLE_QUERY, neptuneSparqlRepo);
 
         } finally {

@@ -19,7 +19,7 @@
     <groupId>com.amazonaws</groupId>
     <artifactId>amazon-neptune-sparql-java-sigv4</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.1</version>
+    <version>3.1.0-SNAPSHOT</version>
 
     <name>amazon-neptune-sparql-java-sigv4</name>
     <description>
@@ -73,17 +73,17 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>2.12.3</version>
+                <version>2.18.2</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.13.4.2</version>
+                <version>2.18.2</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-cbor</artifactId>
-                <version>2.12.3</version>
+                <version>2.18.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -92,7 +92,7 @@
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-repository-sparql</artifactId>
-            <version>3.6.3</version>
+            <version>4.3.15</version>
         </dependency>
 
         <dependency>
@@ -126,7 +126,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>amazon-neptune-sigv4-signer</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.1</version>
         </dependency>
 
         <!-- Test -->
