@@ -126,7 +126,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>amazon-neptune-sigv4-signer</artifactId>
-            <version>3.0.1</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Test -->
