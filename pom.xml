@@ -19,7 +19,7 @@
     <groupId>com.amazonaws</groupId>
     <artifactId>amazon-neptune-sparql-java-sigv4</artifactId>
     <packaging>jar</packaging>
-    <version>3.1.1-SNAPSHOT</version>
+    <version>3.1.2-SNAPSHOT</version>
 
     <name>amazon-neptune-sparql-java-sigv4</name>
     <description>
@@ -66,6 +66,21 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Updated to Java 17 -->
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <!-- Updated Dependency Versions -->
+        <rdf4j.version>4.3.10</rdf4j.version>
+        <jena.version>5.5.0</jena.version>
+        <aws.sdk.version>2.25.25</aws.sdk.version>
+        <junit.version>5.10.2</junit.version>
+        <mockito.version>5.12.0</mockito.version>
+        <!-- Maven Plugin Versions -->
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.10.1</maven-javadoc-plugin.version>
+        <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+        <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -92,28 +107,20 @@
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-repository-sparql</artifactId>
-            <version>4.3.15</version>
+            <version>${rdf4j.version}</version>
         </dependency>
 
+        <!-- Apache Jena -->
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
-            <version>4.2.0</version>
+            <version>${jena.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-base</artifactId>
-            <version>4.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-core</artifactId>
-            <version>4.2.0</version>
-        </dependency>
+        
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-rdfconnection</artifactId>
-            <version>4.2.0</version>
+            <version>${jena.version}</version>
         </dependency>
 
         <dependency>
@@ -148,7 +155,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.2.1</version>
+                        <version>${maven-source-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -163,9 +170,10 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.13.0</version>
+                        <version>${maven-compiler-plugin.version}</version>
                         <configuration>
-                            <release>8</release>
+                            <source>${maven.compiler.source}</source>
+                            <target>${maven.compiler.target}</target>
                         </configuration>
                     </plugin>
 
@@ -173,7 +181,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>${maven-javadoc-plugin.version}</version>
                         <configuration>
                             <name>Amazon Neptune Sparql Java Sigv4</name>
                             <encoding>UTF-8</encoding>
@@ -196,7 +204,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.0.1</version>
+                        <version>${maven-gpg-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -216,7 +224,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
+                        <version>${nexus-staging-maven-plugin.version}</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
