@@ -30,7 +30,7 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 /**
  * SPARQL repository for connecting to Neptune instances.
  * <p>
- * The repository supports both unauthenticated connections as well as IAM using
+ * The repository supports IAM connections
  * Signature V4 auth (<a href="https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html">...</a>).
  * There are two constructors, one for unauthenticated and one for authenticated connections.
  *
@@ -49,7 +49,7 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
     private final String regionName;
 
     /**
-     * Whether or not authentication is enabled.
+     * Whether authentication is enabled.
      */
     private final boolean authenticationEnabled;
 
@@ -87,7 +87,8 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
      * @throws NeptuneSigV4SignerException in case something goes wrong with signer initialization
      */
     public NeptuneSparqlRepository(
-            final String endpointUrl, final AwsCredentialsProvider awsCredentialsProvider,
+            final String endpointUrl,
+            final AwsCredentialsProvider awsCredentialsProvider,
             final String regionName)
             throws NeptuneSigV4SignerException {
 
