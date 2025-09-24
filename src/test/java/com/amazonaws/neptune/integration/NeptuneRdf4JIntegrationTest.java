@@ -28,7 +28,7 @@ class NeptuneRdf4JIntegrationTest {
 
         String neptuneEndpoint = System.getProperty(
                 "neptune.endpoint",
-                "https://playground.cluster-cfk6p1jkvase.us-west-1.neptune.amazonaws.com:8182/");
+                "https://xxxx.xxxx.us-west-1.neptune.amazonaws.com:8182/");
         String regionName = System.getProperty("aws.region", "us-west-1");
 
         assertNotNull(neptuneEndpoint, "Neptune endpoint must be provided via -Dneptune.endpoint=<endpoint>");
