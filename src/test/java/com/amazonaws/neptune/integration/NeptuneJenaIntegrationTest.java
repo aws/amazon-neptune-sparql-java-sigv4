@@ -84,16 +84,47 @@ class NeptuneJenaIntegrationTest {
         }
     }
 
+    /**
+     * Tests Neptune SPARQL operations with Jena, demonstrating the critical requirement
+     * that the request body (SPARQL query) must be provided when creating the signing client.
+     * <p>
+     * <strong>AWS Signature V4 Body Requirement:</strong>
+     * AWS Signature Version 4 requires the request body to be included in the signature
+     * calculation to ensure request integrity and prevent tampering. The signature is
+     * computed using a hash of the request body along with other request components
+     * (headers, URI, method, etc.). This means:
+     * <ul>
+     *   <li>The exact request body must be known at signature creation time</li>
+     *   <li>Any modification to the body after signing would invalidate the signature</li>
+     *   <li>Neptune will reject requests where the body doesn't match the signature</li>
+     * </ul>
+     * <p>
+     * <strong>Why This Matters for SPARQL:</strong>
+     * SPARQL queries are sent as HTTP POST requests with the query in the request body.
+     * Since AWS Signature V4 includes the body hash in the signature calculation,
+     * we must provide the exact SPARQL query text when creating the AwsSigningHttpClient.
+     * This ensures the signature matches what Neptune expects when it validates the request.
+     * <p>
+     * This test verifies that the signing process works correctly by:
+     * <ol>
+     *   <li>Creating a signing client with the INSERT query body</li>
+     *   <li>Executing the INSERT operation (which must match the signed body)</li>
+     *   <li>Verifying the data was inserted by querying it back</li>
+     * </ol>
+     */
 //    @Test
     void testInsertAndQueryWithJena() {
-
+        // Generate the SPARQL INSERT query that will be sent in the request body
         String insertQuery = getInsertQuery(testGraphUri);
 
+        // CRITICAL: The insertQuery must be provided to the signing client because
+        // AWS Signature V4 requires the request body to be included in signature calculation.
+        // The signature includes a hash of the request body to ensure integrity.
         signingClient = new AwsSigningHttpClient(
                 "neptune-db",
                 Region.of(regionName),
                 credentialsProvider,
-                insertQuery
+                insertQuery  // This exact query body will be used for signature calculation
         );
 
         try (RDFConnection conn = RDFConnectionRemote.create()
@@ -103,20 +134,20 @@ class NeptuneJenaIntegrationTest {
                 .updateEndpoint("sparql")
                 .build()) {
 
+            // Execute the INSERT - the request body must match what was used for signing
             conn.update(insertQuery);
             System.out.println("✓ Insert completed successfully");
 
             final int[] resultCount = {0};
 
+            // Query the inserted data to verify the operation succeeded
             conn.querySelect(getSelectQuery(testGraphUri), result -> {
                 resultCount[0]++;
             });
 
-            assertEquals(1, resultCount[0], "Should find exactly 2 results");
+            assertEquals(1, resultCount[0], "Should find exactly 1 result");
             System.out.println("✓ Query completed successfully");
-
         }
-
     }
 
 }
