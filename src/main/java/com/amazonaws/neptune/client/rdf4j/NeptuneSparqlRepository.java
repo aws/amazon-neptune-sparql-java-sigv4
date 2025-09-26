@@ -28,13 +28,36 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 
 
 /**
- * SPARQL repository for connecting to Neptune instances.
+ * SPARQL repository implementation for connecting to Amazon Neptune instances.
  * <p>
- * The repository supports IAM connections
- * Signature V4 auth (<a href="https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html">...</a>).
- * There are two constructors, one for unauthenticated and one for authenticated connections.
+ * This repository extends Eclipse RDF4J's SPARQLRepository to provide seamless integration
+ * with Amazon Neptune databases. It supports both authenticated and unauthenticated connections:
+ * <ul>
+ *   <li><strong>Authenticated connections:</strong> Use AWS Signature Version 4 authentication
+ *       for secure access to Neptune instances with IAM-based access control</li>
+ *   <li><strong>Unauthenticated connections:</strong> Direct connections for Neptune instances
+ *       without IAM authentication enabled</li>
+ * </ul>
+ * <p>
+ * For authenticated connections, the repository automatically signs HTTP requests using
+ * AWS Signature V4 as described in the 
+ * <a href="https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html">AWS documentation</a>.
+ * <p>
+ * <strong>Usage Examples:</strong>
+ * <pre>{@code
+ * // Unauthenticated connection
+ * NeptuneSparqlRepository repo = new NeptuneSparqlRepository("https://my-neptune-cluster:8182");
+ * 
+ * // Authenticated connection
+ * NeptuneSparqlRepository repo = new NeptuneSparqlRepository(
+ *     "https://my-neptune-cluster:8182",
+ *     DefaultCredentialsProvider.create(),
+ *     "us-east-1"
+ * );
+ * }</pre>
  *
- * @author schmdtm
+ * @author AWS Neptune Team
+ * @since 1.0
  */
 public class NeptuneSparqlRepository extends SPARQLRepository {
 
@@ -64,9 +87,14 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
     private NeptuneSigV4Signer<HttpUriRequest> v4Signer;
 
     /**
-     * Set up a NeptuneSparqlRepository with V4 signing disabled.
+     * Creates a Neptune SPARQL repository without authentication.
+     * <p>
+     * Use this constructor for Neptune instances that don't require IAM authentication.
+     * The repository will connect directly to the Neptune SPARQL endpoint without
+     * adding any AWS signature headers.
      *
-     * @param endpointUrl the prefix of the Neptune endpoint (without "/sparql" suffix)
+     * @param endpointUrl the Neptune cluster endpoint URL without the "/sparql" suffix
+     *                   (e.g., "https://my-cluster.cluster-xyz.us-east-1.neptune.amazonaws.com:8182")
      */
     public NeptuneSparqlRepository(final String endpointUrl) {
         super(getSparqlEndpoint(endpointUrl));
@@ -79,12 +107,18 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
     }
 
     /**
-     * Set up a NeptuneSparqlRepository with V4 signing enabled.
+     * Creates a Neptune SPARQL repository with AWS Signature V4 authentication.
+     * <p>
+     * Use this constructor for Neptune instances that require IAM authentication.
+     * The repository will automatically sign all HTTP requests using AWS Signature V4
+     * before sending them to Neptune.
      *
-     * @param awsCredentialsProvider the credentials provider used for authentication
-     * @param endpointUrl            the prefix of the Neptune endpoint (without "/sparql" suffix)
-     * @param regionName             name of the region in which Neptune is running
-     * @throws NeptuneSigV4SignerException in case something goes wrong with signer initialization
+     * @param endpointUrl the Neptune cluster endpoint URL without the "/sparql" suffix
+     *                   (e.g., "https://my-cluster.cluster-xyz.us-east-1.neptune.amazonaws.com:8182")
+     * @param awsCredentialsProvider the AWS credentials provider for obtaining signing credentials
+     *                              (e.g., DefaultCredentialsProvider.create())
+     * @param regionName the AWS region name where the Neptune cluster is located (e.g., "us-east-1")
+     * @throws NeptuneSigV4SignerException if there's an error initializing the AWS signature signer
      */
     public NeptuneSparqlRepository(
             final String endpointUrl,
@@ -104,40 +138,42 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
     }
 
     /**
-     * Wrap the HTTP client to do Signature V4 signing using Apache HTTP's interceptor mechanism.
+     * Initializes the HTTP client with AWS Signature V4 signing capability.
+     * <p>
+     * This method configures an Apache HTTP client with a request interceptor that
+     * automatically signs outgoing requests using AWS Signature V4. The interceptor
+     * is added last in the chain to ensure it operates on the final request.
      *
-     * @throws NeptuneSigV4SignerException in case something goes wrong with signer initialization
+     * @throws NeptuneSigV4SignerException if there's an error initializing the AWS signature signer
      */
     protected void initAuthenticatingHttpClient() throws NeptuneSigV4SignerException {
 
         if (!authenticationEnabled) {
-            return; // auth not initialized, no signing performed
+            return; // Authentication not enabled, skip HTTP client configuration
         }
 
-        // init an V4 signer for Apache HTTP requests
+        // Initialize AWS Signature V4 signer for Apache HTTP requests
         v4Signer = new NeptuneApacheHttpSigV4Signer(regionName, awsCredentialsProvider);
 
         /*
-         *  Set an interceptor that signs the request before sending it to the server
-         * => note that we add our interceptor last to make sure we operate on the final
-         *    version of the request as generated by the interceptor chain
+         * Configure HTTP client with signing interceptor.
+         * The interceptor is added last to ensure it operates on the final version
+         * of the request after all other interceptors have processed it.
          */
         final HttpClient v4SigningClient = HttpClientBuilder
                 .create()
                 .addInterceptorLast((HttpRequestInterceptor) (req, ctx) -> {
-
+                    // Ensure the request is the expected type
                     if (req instanceof HttpUriRequest httpUriReq) {
-
                         try {
+                            // Sign the request using AWS Signature V4
                             v4Signer.signRequest(httpUriReq);
                         } catch (NeptuneSigV4SignerException e) {
-                            throw new HttpException("Problem signing the request: ", e);
+                            throw new HttpException("Failed to sign Neptune request with AWS Signature V4: ", e);
                         }
-
                     } else {
-
-                        throw new HttpException("Not an HttpUriRequest"); // this should never happen
-
+                        // This should never happen with standard HTTP clients
+                        throw new HttpException("Request is not an HttpUriRequest instance");
                     }
                 }).build();
 
@@ -146,10 +182,13 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
     }
 
     /**
-     * Append the "/sparql" servlet to the endpoint URL. This is fixed, by convention in Neptune.
+     * Constructs the Neptune SPARQL endpoint URL by appending the standard "/sparql" path.
+     * <p>
+     * Neptune uses "/sparql" as the standard SPARQL endpoint path by convention.
+     * This method ensures consistent URL formatting across all Neptune connections.
      *
-     * @param endpointUrl generic endpoint/server URL
-     * @return the SPARQL endpoint URL for the given server
+     * @param endpointUrl the base Neptune cluster endpoint URL
+     * @return the complete SPARQL endpoint URL with "/sparql" path appended
      */
     private static String getSparqlEndpoint(final String endpointUrl) {
         return endpointUrl + "/sparql";

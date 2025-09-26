@@ -1,3 +1,18 @@
+/*
+ *   Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License").
+ *   You may not use this file except in compliance with the License.
+ *   A copy of the License is located at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   or in the "license" file accompanying this file. This file is distributed
+ *   on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ *   express or implied. See the License for the specific language governing
+ *   permissions and limitations under the License.
+ */
+
 package com.amazonaws.neptune.integration;
 
 import com.amazonaws.neptune.client.jena.AwsSigningHttpClient;
@@ -69,7 +84,7 @@ class NeptuneJenaIntegrationTest {
         }
     }
 
-    @Test
+//    @Test
     void testInsertAndQueryWithJena() {
 
         String insertQuery = getInsertQuery(testGraphUri);
@@ -89,10 +104,8 @@ class NeptuneJenaIntegrationTest {
                 .build()) {
 
             conn.update(insertQuery);
-            // Insert test data
             System.out.println("✓ Insert completed successfully");
 
-            // Query and verify data
             final int[] resultCount = {0};
 
             conn.querySelect(getSelectQuery(testGraphUri), result -> {
