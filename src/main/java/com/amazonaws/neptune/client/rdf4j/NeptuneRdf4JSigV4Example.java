@@ -49,9 +49,8 @@ public class NeptuneRdf4JSigV4Example {
      * @throws NeptuneSigV4SignerException if there's an error with AWS signature signing
      */
     public static void main(final String[] args) throws NeptuneSigV4SignerException {
-
         // Neptune cluster configuration - replace with your actual values
-        final String endpointUrl = "https://xxxx.cluster-xxxx.us-west-1.neptune.amazonaws.com:8182/";
+        final String endpointUrl = "https://xxxx.cluster-xxxx.us-west-1.neptune.amazonaws.com:8182/sparql";
         final String regionName = "us-west-1";
         
         // Use default AWS credentials provider (checks environment, profiles, IAM roles)

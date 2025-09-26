@@ -62,11 +62,6 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 public class NeptuneSparqlRepository extends SPARQLRepository {
 
     /**
-     * URL of the Neptune endpoint (*without* the trailing "/sparql" servlet).
-     */
-    private final String endpointUrl;
-
-    /**
      * The name of the region in which Neptune is running.
      */
     private final String regionName;
@@ -93,15 +88,14 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
      * The repository will connect directly to the Neptune SPARQL endpoint without
      * adding any AWS signature headers.
      *
-     * @param endpointUrl the Neptune cluster endpoint URL without the "/sparql" suffix
-     *                   (e.g., "https://my-cluster.cluster-xyz.us-east-1.neptune.amazonaws.com:8182")
+     * @param endpointUrl the fully qualified Neptune cluster endpoint URL
+     *                   (e.g., "https://my-cluster.cluster-xyz.us-east-1.neptune.amazonaws.com:8182/sparql")
      */
     public NeptuneSparqlRepository(final String endpointUrl) {
-        super(getSparqlEndpoint(endpointUrl));
+        super(endpointUrl);
 
         // all the fields below are only relevant for authentication and can be ignored
         this.authenticationEnabled = false;
-        this.endpointUrl = null; // only needed if auth is enabled
         this.awsCredentialsProvider = null; // only needed if auth is enabled
         this.regionName = null; // only needed if auth is enabled
     }
@@ -113,8 +107,8 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
      * The repository will automatically sign all HTTP requests using AWS Signature V4
      * before sending them to Neptune.
      *
-     * @param endpointUrl the Neptune cluster endpoint URL without the "/sparql" suffix
-     *                   (e.g., "https://my-cluster.cluster-xyz.us-east-1.neptune.amazonaws.com:8182")
+     * @param endpointUrl fully qualified Neptune cluster endpoint URL
+     *                   (e.g., "https://my-cluster.cluster-xyz.us-east-1.neptune.amazonaws.com:8182/sparql")
      * @param awsCredentialsProvider the AWS credentials provider for obtaining signing credentials
      *                              (e.g., DefaultCredentialsProvider.create())
      * @param regionName the AWS region name where the Neptune cluster is located (e.g., "us-east-1")
@@ -126,10 +120,9 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
             final String regionName)
             throws NeptuneSigV4SignerException {
 
-        super(getSparqlEndpoint(endpointUrl));
+        super(endpointUrl);
 
         this.authenticationEnabled = true;
-        this.endpointUrl = endpointUrl;
         this.awsCredentialsProvider = awsCredentialsProvider;
         this.regionName = regionName;
 
@@ -179,19 +172,6 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
 
         setHttpClient(v4SigningClient);
 
-    }
-
-    /**
-     * Constructs the Neptune SPARQL endpoint URL by appending the standard "/sparql" path.
-     * <p>
-     * Neptune uses "/sparql" as the standard SPARQL endpoint path by convention.
-     * This method ensures consistent URL formatting across all Neptune connections.
-     *
-     * @param endpointUrl the base Neptune cluster endpoint URL
-     * @return the complete SPARQL endpoint URL with "/sparql" path appended
-     */
-    private static String getSparqlEndpoint(final String endpointUrl) {
-        return endpointUrl + "/sparql";
     }
 
 }
