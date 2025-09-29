@@ -52,7 +52,7 @@ public class NeptuneJenaSigV4Example {
      */
     public static void main(String... args) {
         // Neptune cluster configuration - replace with your actual values
-        final String endpoint = "https://xxxxx.cluster-xxxx.us-west-1.neptune.amazonaws.com:8182";
+        final String endpoint = "https://xxxx.cluster-xxxx.us-west-1.neptune.amazonaws.com:8182/";
         final String regionName = "us-west-1";
         
         // Use default AWS credentials provider (checks environment, profiles, IAM roles)

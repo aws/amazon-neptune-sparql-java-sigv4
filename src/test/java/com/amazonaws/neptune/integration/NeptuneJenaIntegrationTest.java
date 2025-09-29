@@ -43,7 +43,7 @@ class NeptuneJenaIntegrationTest {
     );
     private final String neptuneEndpoint = System.getProperty(
             "neptune.endpoint",
-            "https://playground.cluster-cfk6p1jkvase.us-west-1.neptune.amazonaws.com:8182/"
+            "https://xxxx.cluster-xxxx.us-west-1.neptune.amazonaws.com:8182/"
     );
     private DefaultCredentialsProvider credentialsProvider;
 
