@@ -43,7 +43,7 @@ class NeptuneJenaIntegrationTest {
     );
     private final String neptuneEndpoint = System.getProperty(
             "neptune.endpoint",
-            "https://xxxx.xxxx.us-west-1.neptune.amazonaws.com:8182/"
+            "https://playground.cluster-cfk6p1jkvase.us-west-1.neptune.amazonaws.com:8182/"
     );
     private DefaultCredentialsProvider credentialsProvider;
 
@@ -112,7 +112,7 @@ class NeptuneJenaIntegrationTest {
      *   <li>Verifying the data was inserted by querying it back</li>
      * </ol>
      */
-//    @Test
+    @Test
     void testInsertAndQueryWithJena() {
         // Generate the SPARQL INSERT query that will be sent in the request body
         String insertQuery = getInsertQuery(testGraphUri);

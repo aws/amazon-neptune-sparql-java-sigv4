@@ -43,7 +43,7 @@ class NeptuneRdf4JIntegrationTest {
 
         String neptuneEndpoint = System.getProperty(
                 "neptune.endpoint",
-                "https://xxxx.cluster-xxxx.us-west-1.neptune.amazonaws.com:8182/sparql");
+                "https://playground.cluster-cfk6p1jkvase.us-west-1.neptune.amazonaws.com:8182/sparql");
         String regionName = System.getProperty("aws.region", "us-west-1");
 
         assertNotNull(neptuneEndpoint, "Neptune endpoint must be provided via -Dneptune.endpoint=<endpoint>");
@@ -77,15 +77,6 @@ class NeptuneRdf4JIntegrationTest {
 
         } catch (Exception e) {
             fail("RDF4J Insert and Query test failed: " + e.getMessage());
-        }
-    }
-
-//    @Test
-    void testRepositoryConnection() throws Exception {
-        try (RepositoryConnection conn = repository.getConnection()) {
-            assertTrue(conn.isOpen());
-            assertNotNull(conn.getValueFactory());
-            System.out.println("✓ RDF4J Repository connection test passed");
         }
     }
 
