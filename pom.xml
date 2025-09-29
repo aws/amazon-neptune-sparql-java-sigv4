@@ -67,12 +67,12 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Updated to Java 17 -->
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>23</maven.compiler.source>
+        <maven.compiler.target>23</maven.compiler.target>
         <!-- Updated Dependency Versions -->
-        <rdf4j.version>4.3.10</rdf4j.version>
+        <rdf4j.version>5.1.6</rdf4j.version>
         <jena.version>5.5.0</jena.version>
-        <aws.sdk.version>2.25.25</aws.sdk.version>
+        <aws.sdk.version>2.34.5</aws.sdk.version>
         <junit.version>5.10.2</junit.version>
         <mockito.version>5.12.0</mockito.version>
         <!-- Maven Plugin Versions -->
@@ -81,6 +81,7 @@
         <maven-javadoc-plugin.version>3.10.1</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
+        <httpclient5.version>5.5.1</httpclient5.version>
     </properties>
 
     <dependencyManagement>
@@ -124,9 +125,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>${httpclient5.version}</version>
         </dependency>
 
         <!-- Neptune Sigv4 Signer -->

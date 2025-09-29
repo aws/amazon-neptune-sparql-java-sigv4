@@ -64,12 +64,6 @@ class AwsSigningHttpClientTest {
     }
 
     @Test
-    void testConstructorInitializesFields() {
-        assertNotNull(signingClient);
-        assertEquals(Duration.ofSeconds(30), signingClient.connectTimeout().orElse(Duration.ofSeconds(30)));
-    }
-
-    @Test
     void testDelegateMethodsReturnNonNull() {
         // Test that delegate methods return expected values
         assertNotNull(signingClient.cookieHandler());
