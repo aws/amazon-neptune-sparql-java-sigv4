@@ -93,7 +93,6 @@ public class NeptuneSparqlRepository extends SPARQLRepository {
      */
     public NeptuneSparqlRepository(final String endpointUrl) {
         super(endpointUrl);
-
         // all the fields below are only relevant for authentication and can be ignored
         this.authenticationEnabled = false;
         this.awsCredentialsProvider = null; // only needed if auth is enabled
