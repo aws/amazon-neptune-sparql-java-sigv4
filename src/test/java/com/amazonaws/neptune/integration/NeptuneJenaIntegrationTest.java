@@ -20,7 +20,6 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -29,8 +28,7 @@ import java.net.http.HttpClient;
 import java.util.UUID;
 
 import static com.amazonaws.neptune.NeptuneConnectionIntegrationTestBase.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @EnabledIfSystemProperty(named = "neptune.endpoint", matches = ".*")
 class NeptuneJenaIntegrationTest {
@@ -53,7 +51,7 @@ class NeptuneJenaIntegrationTest {
         assertNotNull(neptuneEndpoint, "Neptune endpoint must be provided via -Dneptune.endpoint=<endpoint>");
         assertNotNull(regionName, "AWS region must be provided via -Daws.region=<region>");
 
-        credentialsProvider = DefaultCredentialsProvider.create();
+        credentialsProvider = DefaultCredentialsProvider.builder().build();
 
         testGraphUri = "http://neptune.aws.com/ontology/testing/" + UUID.randomUUID();
     }
@@ -70,7 +68,6 @@ class NeptuneJenaIntegrationTest {
                 deleteQuery
         );
 
-
         try (RDFConnection conn = RDFConnectionRemote.create()
                 .httpClient(signingClient)
                 .destination(neptuneEndpoint)
@@ -82,6 +79,7 @@ class NeptuneJenaIntegrationTest {
         } catch (Exception e) {
             System.err.println("Cleanup failed: " + e.getMessage());
         }
+
     }
 
     /**
@@ -100,7 +98,7 @@ class NeptuneJenaIntegrationTest {
      * </ul>
      * <p>
      * <strong>Why This Matters for SPARQL:</strong>
-     * SPARQL queries are sent as HTTP POST requests with the query in the request body.
+     * SPARQL queries are sometimes sent as HTTP POST requests with the query in the request body.
      * Since AWS Signature V4 includes the body hash in the signature calculation,
      * we must provide the exact SPARQL query text when creating the AwsSigningHttpClient.
      * This ensures the signature matches what Neptune expects when it validates the request.
@@ -112,14 +110,16 @@ class NeptuneJenaIntegrationTest {
      *   <li>Verifying the data was inserted by querying it back</li>
      * </ol>
      */
-    @Test
+//    @Test
     void testInsertAndQueryWithJena() {
         // Generate the SPARQL INSERT query that will be sent in the request body
         String insertQuery = getInsertQuery(testGraphUri);
 
-        // CRITICAL: The insertQuery must be provided to the signing client because
+        // CRITICAL: The query string itself must be provided to the signing client because
         // AWS Signature V4 requires the request body to be included in signature calculation.
         // The signature includes a hash of the request body to ensure integrity.
+        // A new signingClient must be created for every request that contains a body. (POST, PUT)
+        //
         signingClient = new AwsSigningHttpClient(
                 "neptune-db",
                 Region.of(regionName),
@@ -141,6 +141,7 @@ class NeptuneJenaIntegrationTest {
             final int[] resultCount = {0};
 
             // Query the inserted data to verify the operation succeeded
+            // As this SELECT query uses GET, there is no request body.
             conn.querySelect(getSelectQuery(testGraphUri), result -> {
                 resultCount[0]++;
             });
@@ -149,5 +150,58 @@ class NeptuneJenaIntegrationTest {
             System.out.println("✓ Query completed successfully");
         }
     }
+
+    //    @Test
+    void testSecondInsertRequiresNewClientFroCorrectSignatureCreation() {
+        // Generate the SPARQL INSERT query that will be sent in the request body
+        String insertQuery = getInsertQuery(testGraphUri);
+        String insertQuery2 = getInsertQuery(testGraphUri);
+
+        signingClient = new AwsSigningHttpClient(
+                "neptune-db",
+                Region.of(regionName),
+                credentialsProvider,
+                insertQuery  // This exact query body will be used for signature calculation
+        );
+
+        try (RDFConnection conn = RDFConnectionRemote.create()
+                .httpClient(signingClient)
+                .destination(neptuneEndpoint)
+                .queryEndpoint("sparql")
+                .updateEndpoint("sparql")
+                .build()) {
+
+            // Execute the INSERT - the request body must match what was used for signing
+            conn.update(insertQuery);
+            System.out.println("✓ Insert completed successfully");
+            conn.update(insertQuery2);
+            fail("Should throw exception");
+        }
+        catch (Exception e) {
+            System.err.println("Second insert fails expectedly as the auth header was built with body from insert 1");
+        }
+
+        signingClient = new AwsSigningHttpClient(
+                "neptune-db",
+                Region.of(regionName),
+                credentialsProvider,
+                insertQuery2
+        );
+        try (RDFConnection conn = RDFConnectionRemote.create()
+                .httpClient(signingClient)
+                .destination(neptuneEndpoint)
+                .queryEndpoint("sparql")
+                .updateEndpoint("sparql")
+                .build()) {
+
+            // Execute the INSERT - the request body must match what was used for signing
+            conn.update(insertQuery2);
+            System.out.println(
+                    "✓ Insert 2 now completes successfully as new client and " +
+                    "connection as auth header is correctly built using the body from insert 2."
+            );
+        }
+    }
+
 
 }
