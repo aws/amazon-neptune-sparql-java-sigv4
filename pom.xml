@@ -19,12 +19,12 @@
     <groupId>com.amazonaws</groupId>
     <artifactId>amazon-neptune-sparql-java-sigv4</artifactId>
     <packaging>jar</packaging>
-    <version>3.1.1-SNAPSHOT</version>
+    <version>4.0.0</version>
 
     <name>amazon-neptune-sparql-java-sigv4</name>
     <description>
-        A SPARQL client for Amazon Neptune that includes AWS Signature Version 4 signing. Implemented as an RDF4J
-        repository.
+        A SPARQL client for Amazon Neptune that includes AWS Signature Version 4 signing.
+        A NeptuneSparqlRepository for RDF4j and a AwsSigningHttpClient to use when creating a JENA repository connection.
     </description>
     <url>https://github.com/aws/amazon-neptune-sparql-java-sigv4</url>
 
