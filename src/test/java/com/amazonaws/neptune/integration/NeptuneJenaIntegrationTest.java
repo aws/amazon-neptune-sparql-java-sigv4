@@ -16,10 +16,12 @@
 package com.amazonaws.neptune.integration;
 
 import com.amazonaws.neptune.client.jena.AwsSigningHttpClient;
+import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -35,13 +37,14 @@ class NeptuneJenaIntegrationTest {
 
     private HttpClient signingClient;
     private String testGraphUri;
+    private String testGraphUri2;
     private final String regionName = System.getProperty(
             "aws.region",
             "us-west-1"
     );
     private final String neptuneEndpoint = System.getProperty(
             "neptune.endpoint",
-            "https://xxxx.cluster-xxxx.us-west-1.neptune.amazonaws.com:8182/"
+            "https://playground.cluster-cfk6p1jkvase.us-west-1.neptune.amazonaws.com:8182/"
     );
     private DefaultCredentialsProvider credentialsProvider;
 
@@ -54,6 +57,7 @@ class NeptuneJenaIntegrationTest {
         credentialsProvider = DefaultCredentialsProvider.builder().build();
 
         testGraphUri = "http://neptune.aws.com/ontology/testing/" + UUID.randomUUID();
+        testGraphUri2 = "http://neptune.aws.com/ontology/testing/" + UUID.randomUUID();
     }
 
     @AfterEach
@@ -110,7 +114,7 @@ class NeptuneJenaIntegrationTest {
      *   <li>Verifying the data was inserted by querying it back</li>
      * </ol>
      */
-//    @Test
+    @Test
     void testInsertAndQueryWithJena() {
         // Generate the SPARQL INSERT query that will be sent in the request body
         String insertQuery = getInsertQuery(testGraphUri);
@@ -151,11 +155,11 @@ class NeptuneJenaIntegrationTest {
         }
     }
 
-    //    @Test
+    @Test
     void testSecondInsertRequiresNewClientFroCorrectSignatureCreation() {
         // Generate the SPARQL INSERT query that will be sent in the request body
         String insertQuery = getInsertQuery(testGraphUri);
-        String insertQuery2 = getInsertQuery(testGraphUri);
+        String insertQuery2 = getInsertQuery(testGraphUri2);
 
         signingClient = new AwsSigningHttpClient(
                 "neptune-db",
@@ -176,19 +180,18 @@ class NeptuneJenaIntegrationTest {
             System.out.println("✓ Insert completed successfully");
             conn.update(insertQuery2);
             fail("Should throw exception");
-        }
-        catch (Exception e) {
-            System.err.println("Second insert fails expectedly as the auth header was built with body from insert 1");
+        } catch (HttpException hje) {
+            assertTrue(hje.getMessage().contains("403 - Forbidden"));
         }
 
-        signingClient = new AwsSigningHttpClient(
+        HttpClient signingClient2 = new AwsSigningHttpClient(
                 "neptune-db",
                 Region.of(regionName),
                 credentialsProvider,
                 insertQuery2
         );
         try (RDFConnection conn = RDFConnectionRemote.create()
-                .httpClient(signingClient)
+                .httpClient(signingClient2)
                 .destination(neptuneEndpoint)
                 .queryEndpoint("sparql")
                 .updateEndpoint("sparql")
@@ -198,7 +201,7 @@ class NeptuneJenaIntegrationTest {
             conn.update(insertQuery2);
             System.out.println(
                     "✓ Insert 2 now completes successfully as new client and " +
-                    "connection as auth header is correctly built using the body from insert 2."
+                            "connection as auth header is correctly built using the body from insert 2."
             );
         }
     }

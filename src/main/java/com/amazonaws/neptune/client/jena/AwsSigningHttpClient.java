@@ -16,11 +16,10 @@
 package com.amazonaws.neptune.client.jena;
 
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-
+import software.amazon.awssdk.auth.signer.Aws4Signer;
+import software.amazon.awssdk.auth.signer.params.Aws4SignerParams;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpMethod;
-import software.amazon.awssdk.http.auth.aws.signer.AwsV4HttpSigner;
-import software.amazon.awssdk.http.auth.spi.signer.SignedRequest;
 import software.amazon.awssdk.regions.Region;
 
 import javax.net.ssl.SSLContext;
@@ -136,17 +135,20 @@ public class AwsSigningHttpClient extends HttpClient {
         // Convert the Java HTTP request to AWS SDK format for signing
         SdkHttpFullRequest awsRequestForSigning = toSdkRequest(request, requestBody);
 
-        AwsV4HttpSigner signer = AwsV4HttpSigner.create();
-        SignedRequest signedRequest = signer.sign(r -> r
-                .identity(credentialsProvider.resolveCredentials())
-                .request(awsRequestForSigning)
-                .putProperty(AwsV4HttpSigner.SERVICE_SIGNING_NAME, serviceName)
-                .putProperty(AwsV4HttpSigner.REGION_NAME, region.id()));
+        // Configure the AWS Signature V4 signer parameters
+        Aws4SignerParams signerParams = Aws4SignerParams.builder()
+                .awsCredentials(credentialsProvider.resolveCredentials())
+                .signingName(serviceName)
+                .signingRegion(region)
+                .build();
+
+        // Sign the request using AWS Signature V4
+        SdkHttpFullRequest signedSdkRequest = Aws4Signer.create().sign(awsRequestForSigning, signerParams);
 
         // Add the authentication headers to the original request
         return signedRequestBuilder
-                .header("Authorization", signedRequest.request().headers().get("Authorization").getFirst())
-                .header("x-amz-date", signedRequest.request().headers().get("x-amz-date").getFirst())
+                .header("Authorization", signedSdkRequest.headers().get("Authorization").get(0))
+                .header("x-amz-date", signedSdkRequest.headers().get("x-amz-date").get(0))
                 .build();
     }
 
