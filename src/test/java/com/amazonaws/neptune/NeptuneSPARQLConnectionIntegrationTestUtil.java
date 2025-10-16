@@ -28,7 +28,7 @@ package com.amazonaws.neptune;
  * @author AWS Neptune Team
  * @since 1.0
  */
-public class NeptuneConnectionIntegrationTestBase {
+public class NeptuneSPARQLConnectionIntegrationTestUtil {
 
     /**
      * Generates a SPARQL INSERT query for adding test data to a named graph.

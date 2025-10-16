@@ -45,15 +45,22 @@ public class NeptuneJenaSigV4Example {
     /**
      * Main method demonstrating Neptune connection with Jena and AWS Signature V4.
      * <p>
-     * Replace the endpoint URL and region with your actual Neptune cluster details.
+     * Requires two command line arguments: endpoint URL and region name.
      * Ensure your AWS credentials are properly configured in your environment.
+     * <p>
+     * Example usage:
+     * {@code java NeptuneJenaSigV4Example https://my-cluster.cluster-xyz.us-west-2.neptune.amazonaws.com:8182 us-west-2}
      * 
-     * @param args command line arguments (not used)
+     * @param args command line arguments: [0] endpoint URL, [1] region name
      */
     public static void main(String... args) {
-        // Neptune cluster configuration - replace with your actual values
-        final String endpoint = "https://xxxx.cluster-xxxx.us-west-1.neptune.amazonaws.com:8182";
-        final String regionName = "us-west-1";
+        if (args.length < 2) {
+            System.err.println("Usage: java NeptuneJenaSigV4Example <endpoint> <regionName>");
+            System.exit(1);
+        }
+        
+        final String endpoint = args[0];
+        final String regionName = args[1];
         
         // Use default AWS credentials provider (checks environment, profiles, IAM roles)
         final AwsCredentialsProvider awsCredentialsProvider = DefaultCredentialsProvider.builder().build();

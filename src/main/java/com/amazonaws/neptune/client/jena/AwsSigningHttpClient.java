@@ -52,8 +52,7 @@ import java.util.concurrent.Executor;
  * A new HTTP client and connection must be created every time the request contains a BODY.
  * </P>
  * 
- * @author AWS Neptune Team
- * @since 1.0
+ * @author Charles Ivie
  */
 public class AwsSigningHttpClient extends HttpClient {
 

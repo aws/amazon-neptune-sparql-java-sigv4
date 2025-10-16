@@ -28,8 +28,8 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 
 import java.util.UUID;
 
-import static com.amazonaws.neptune.NeptuneConnectionIntegrationTestBase.getInsertQuery;
-import static com.amazonaws.neptune.NeptuneConnectionIntegrationTestBase.getSelectQuery;
+import static com.amazonaws.neptune.NeptuneSPARQLConnectionIntegrationTestUtil.getInsertQuery;
+import static com.amazonaws.neptune.NeptuneSPARQLConnectionIntegrationTestUtil.getSelectQuery;
 import static org.junit.jupiter.api.Assertions.*;
 
 @EnabledIfSystemProperty(named = "neptune.endpoint", matches = ".*")
@@ -37,20 +37,15 @@ class NeptuneRdf4JIntegrationTest {
 
     private Repository repository;
     private String testGraphUri;
+    String neptuneEndpoint = System.getProperty("neptune.endpoint").concat("/sparql");
+    String regionName = System.getProperty("aws.region", "us-west-1");
 
     @BeforeEach
     void setUp() throws Exception {
 
-        String neptuneEndpoint = System.getProperty(
-                "neptune.endpoint",
-                "https://xxxx.cluster-xxxx.us-west-1.neptune.amazonaws.com:8182/sparql");
-        String regionName = System.getProperty("aws.region", "us-west-1");
-
-        assertNotNull(neptuneEndpoint, "Neptune endpoint must be provided via -Dneptune.endpoint=<endpoint>");
-
         repository = new NeptuneSparqlRepository(
                 neptuneEndpoint,
-                DefaultCredentialsProvider.create(),
+                DefaultCredentialsProvider.builder().build(),
                 regionName
         );
         repository.init();
@@ -59,7 +54,7 @@ class NeptuneRdf4JIntegrationTest {
     }
 
     @Test
-    void testInsertAndQueryWithRdf4J() throws Exception {
+    void testInsertAndQueryWithRdf4J(){
 
         try (RepositoryConnection conn = repository.getConnection()) {
             // Insert test data
@@ -73,7 +68,6 @@ class NeptuneRdf4JIntegrationTest {
             long resultCount = tupleQuery.evaluate().stream().count();
 
             assertEquals(1, resultCount, "Should find exactly 1 result");
-            System.out.println("✓ RDF4J Query completed successfully");
 
         } catch (Exception e) {
             fail("RDF4J Insert and Query test failed: " + e.getMessage());
@@ -87,9 +81,6 @@ class NeptuneRdf4JIntegrationTest {
         try (RepositoryConnection conn = repository.getConnection()) {
             Update update = conn.prepareUpdate(deleteQuery);
             update.execute();
-            System.out.println("✓ RDF4J Cleanup completed");
-        } catch (Exception e) {
-            System.err.println("RDF4J Cleanup failed: " + e.getMessage());
         }
     }
 }

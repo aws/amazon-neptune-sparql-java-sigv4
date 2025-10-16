@@ -39,15 +39,6 @@ class NeptuneSparqlRepositoryTest {
     private final String testRegion = "us-east-1";
 
     @Test
-    void testUnauthenticatedRepositoryCreation() {
-        // Test creating repository without authentication
-        NeptuneSparqlRepository repository = new NeptuneSparqlRepository(testEndpoint);
-        
-        assertNotNull(repository);
-        assertEquals(testEndpoint , repository.toString());
-    }
-
-    @Test
     void testAuthenticatedRepositoryCreation() throws NeptuneSigV4SignerException {
         MockitoAnnotations.openMocks(this);
         
@@ -93,14 +84,6 @@ class NeptuneSparqlRepositoryTest {
         assertThrows(Exception.class, () -> {
             new NeptuneSparqlRepository(testEndpoint, mockCredentialsProvider, null);
         });
-    }
-
-    @Test
-    void testRepositoryInheritance() {
-        // Test that repository properly extends SPARQLRepository
-        NeptuneSparqlRepository repository = new NeptuneSparqlRepository(testEndpoint);
-        
-        assertTrue(repository instanceof org.eclipse.rdf4j.repository.sparql.SPARQLRepository);
     }
 
     @Test

@@ -29,7 +29,7 @@ import software.amazon.awssdk.regions.Region;
 import java.net.http.HttpClient;
 import java.util.UUID;
 
-import static com.amazonaws.neptune.NeptuneConnectionIntegrationTestBase.*;
+import static com.amazonaws.neptune.NeptuneSPARQLConnectionIntegrationTestUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @EnabledIfSystemProperty(named = "neptune.endpoint", matches = ".*")
@@ -43,16 +43,13 @@ class NeptuneJenaIntegrationTest {
             "us-west-1"
     );
     private final String neptuneEndpoint = System.getProperty(
-            "neptune.endpoint",
-            "https://xxxx.cluster-xxxx.us-west-1.neptune.amazonaws.com:8182/"
+            "neptune.endpoint"
     );
     private DefaultCredentialsProvider credentialsProvider;
 
 
     @BeforeEach
     void setUp() {
-        assertNotNull(neptuneEndpoint, "Neptune endpoint must be provided via -Dneptune.endpoint=<endpoint>");
-        assertNotNull(regionName, "AWS region must be provided via -Daws.region=<region>");
 
         credentialsProvider = DefaultCredentialsProvider.builder().build();
 
@@ -79,9 +76,6 @@ class NeptuneJenaIntegrationTest {
                 .build()) {
 
             conn.update(deleteQuery);
-            System.out.println("✓ Cleanup completed");
-        } catch (Exception e) {
-            System.err.println("Cleanup failed: " + e.getMessage());
         }
 
     }
@@ -119,11 +113,6 @@ class NeptuneJenaIntegrationTest {
         // Generate the SPARQL INSERT query that will be sent in the request body
         String insertQuery = getInsertQuery(testGraphUri);
 
-        // CRITICAL: The query string itself must be provided to the signing client because
-        // AWS Signature V4 requires the request body to be included in signature calculation.
-        // The signature includes a hash of the request body to ensure integrity.
-        // A new signingClient must be created for every request that contains a body. (POST, PUT)
-        //
         signingClient = new AwsSigningHttpClient(
                 "neptune-db",
                 Region.of(regionName),
@@ -151,12 +140,19 @@ class NeptuneJenaIntegrationTest {
             });
 
             assertEquals(1, resultCount[0], "Should find exactly 1 result");
-            System.out.println("✓ Query completed successfully");
         }
     }
 
+    /**
+     * Tests that a new signing client must be created for each request with a different body.
+     * <p>
+     * CRITICAL: The query string itself must be provided to the signing client because
+     * AWS Signature V4 requires the request body to be included in signature calculation.
+     * The signature includes a hash of the request body to ensure integrity.
+     * Because of this, a new signingClient must be created for every request that contains a body (POST, PUT).
+     */
     @Test
-    void testSecondInsertRequiresNewClientFroCorrectSignatureCreation() {
+    void testSecondInsertRequiresNewClientForCorrectSignatureCreation() {
         // Generate the SPARQL INSERT query that will be sent in the request body
         String insertQuery = getInsertQuery(testGraphUri);
         String insertQuery2 = getInsertQuery(testGraphUri2);
