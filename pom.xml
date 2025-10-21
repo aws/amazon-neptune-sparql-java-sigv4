@@ -19,7 +19,7 @@
     <groupId>com.amazonaws</groupId>
     <artifactId>amazon-neptune-sparql-java-sigv4</artifactId>
     <packaging>jar</packaging>
-    <version>4.0.0</version>
+    <version>4.0.0-SNAPSHOT</version>
 
     <name>amazon-neptune-sparql-java-sigv4</name>
     <description>
@@ -133,7 +133,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>amazon-neptune-sigv4-signer</artifactId>
-            <version>${project.version}</version>
+            <version>3.1.0</version>
         </dependency>
 
         <!-- AWS SDK Dependencies -->
@@ -155,6 +155,12 @@
             <version>${aws.sdk.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>utils</artifactId>
+            <version>${aws.sdk.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
