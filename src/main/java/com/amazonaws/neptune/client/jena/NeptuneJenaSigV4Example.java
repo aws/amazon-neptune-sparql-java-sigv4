@@ -15,79 +15,79 @@
 
 package com.amazonaws.neptune.client.jena;
 
-import com.amazonaws.neptune.auth.NeptuneApacheHttpSigV4Signer;
-import com.amazonaws.neptune.auth.NeptuneSigV4SignerException;
-import software.amazon.awssdk.utils.StringUtils;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.protocol.HttpContext;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.RDFConnectionRemoteBuilder;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
 
-/*
- * Example of a building a remote connection
+import java.net.http.HttpClient;
+
+/**
+ * Example demonstrating how to connect to Amazon Neptune using Apache Jena with AWS Signature V4 authentication.
+ * <p>
+ * This example shows how to:
+ * <ul>
+ *   <li>Create an AWS signing HTTP client for Neptune authentication</li>
+ *   <li>Configure a Jena RDF connection with the signing client</li>
+ *   <li>Execute SPARQL queries against a Neptune database</li>
+ * </ul>
+ * <p>
+ * The example uses the default AWS credentials provider, which will automatically
+ * discover credentials from the environment, AWS profiles, or IAM roles.
+ * 
+ * @author AWS Neptune Team
+ * @since 1.0
  */
 public class NeptuneJenaSigV4Example {
 
-    public static void main(String... args) throws NeptuneSigV4SignerException {
-
-        if (args.length == 0 || StringUtils.isEmpty(args[0])) {
-            System.err.println("Please specify your endpoint as program argument "
-                    + "(e.g.: http://<your_neptune_endpoint>:<your_neptune_endpoint>)");
+    /**
+     * Main method demonstrating Neptune connection with Jena and AWS Signature V4.
+     * <p>
+     * Requires two command line arguments: endpoint URL and region name.
+     * Ensure your AWS credentials are properly configured in your environment.
+     * <p>
+     * Example usage:
+     * {@code java NeptuneJenaSigV4Example https://my-cluster.cluster-xyz.us-west-2.neptune.amazonaws.com:8182 us-west-2}
+     * 
+     * @param args command line arguments: [0] endpoint URL, [1] region name
+     */
+    public static void main(String... args) {
+        if (args.length < 2) {
+            System.err.println("Usage: java NeptuneJenaSigV4Example <endpoint> <regionName>");
             System.exit(1);
         }
-
+        
         final String endpoint = args[0];
+        final String regionName = args[1];
+        
+        // Use default AWS credentials provider (checks environment, profiles, IAM roles)
+        final AwsCredentialsProvider awsCredentialsProvider = DefaultCredentialsProvider.builder().build();
 
-        final String regionName = "us-east-1";
-        final AwsCredentialsProvider awsCredentialsProvider = DefaultCredentialsProvider.create();
-
-        final NeptuneApacheHttpSigV4Signer v4Signer = new NeptuneApacheHttpSigV4Signer(regionName, awsCredentialsProvider);
-
-        final HttpClient v4SigningClient = HttpClientBuilder.create().addInterceptorLast(new HttpRequestInterceptor() {
-
-            @Override
-            public void process(final HttpRequest req, final HttpContext ctx) throws HttpException {
-
-                if (req instanceof HttpUriRequest) {
-
-                    final HttpUriRequest httpUriReq = (HttpUriRequest) req;
-                    try {
-                        v4Signer.signRequest(httpUriReq);
-                    } catch (NeptuneSigV4SignerException e) {
-                        throw new HttpException("Problem signing the request: ", e);
-                    }
-
-                } else {
-
-                    throw new HttpException("Not an HttpUriRequest"); // this should never happen
-                }
-            }
-
-        }).build();
-
-        RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
-                .httpClient(v4SigningClient)
-                .destination(endpoint)
-                // Query only.
-                .queryEndpoint("sparql")
-                .updateEndpoint("sparql");
-
+        // Sample SPARQL query to retrieve triples
         String query = "SELECT * { ?s ?p ?o } LIMIT 100";
 
-        // Whether the connection can be reused depends on the details of the implementation.
-        // See example 5.
+        // Create signing HTTP client for Neptune authentication
+        HttpClient signingClient = new AwsSigningHttpClient(
+                "neptune-db",  // AWS service name for Neptune
+                Region.of(regionName),
+                awsCredentialsProvider,
+                query
+        );
+
+        // Build Jena RDF connection with the signing client
+        RDFConnectionRemoteBuilder builder = RDFConnectionRemote.create()
+                .httpClient(signingClient)
+                .destination(endpoint)
+                .queryEndpoint("sparql")    // Neptune SPARQL query endpoint
+                .updateEndpoint("sparql");  // Neptune SPARQL update endpoint
+
+        // Execute the query using try-with-resources for automatic connection cleanup
         try (RDFConnection conn = builder.build()) {
             System.out.println("> Printing query result: ");
             conn.querySelect(query, System.out::println);
         }
     }
-}
 
+}
