@@ -78,7 +78,7 @@
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.10.1</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-        <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
+        <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
         <httpclient5.version>5.5.1</httpclient5.version>
         <slf4j-simple.version>2.0.16</slf4j-simple.version>
     </properties>
@@ -205,7 +205,6 @@
                         </executions>
                     </plugin>
 
-                    <!-- Compile to JDK 8. -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
